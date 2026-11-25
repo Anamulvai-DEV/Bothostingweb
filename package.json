@@ -1,0 +1,16 @@
+{
+  "name": "arx-hosting",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ARX HOSTING starter dashboard with Upstash Redis",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@upstash/redis": "^1.34.3",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "connect-redis": "^7.1.1"
+  }
+}
