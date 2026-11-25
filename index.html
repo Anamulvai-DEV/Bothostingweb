@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARX HOSTING</title><style>
+:root{color-scheme:dark;--bg:#070b16;--panel:#101a2c;--line:#20324c;--cyan:#62e4ff;--muted:#9aacc4}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#12314a 0,transparent 35%),var(--bg);color:#f3f7ff;font:15px system-ui,Arial}
+main{max-width:1050px;margin:auto;padding:28px 18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:900;letter-spacing:2px;color:var(--cyan);font-size:22px}
+.panel{background:linear-gradient(145deg,#121f34,#0c1423);border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:20px;box-shadow:0 18px 55px #0005}
+h1{font-size:clamp(28px,6vw,46px);margin:32px 0 8px}p{color:var(--muted);line-height:1.6}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+input,select,button{width:100%;padding:13px;border-radius:11px;border:1px solid var(--line);background:#091222;color:white;margin:6px 0;font:inherit}
+button{background:linear-gradient(90deg,#147da2,#2860b7);border:0;font-weight:700;cursor:pointer}button.secondary{background:#1b2a40}
+small{color:var(--muted)}.hidden{display:none}.stat{font-size:25px;font-weight:800;color:var(--cyan)}.msg{min-height:22px;color:#ffd47b}
+</style></head><body><main>
+<div class="top"><div class="brand">✦ ARX HOSTING</div><small>Independent Hosting Dashboard</small></div>
+<h1>Deploy. Manage. <span style="color:var(--cyan)">Scale.</span></h1><p>Your control center for projects and hosting resources.</p>
+<div class="grid">
+<section class="panel"><h2>Create account</h2><input id="name" placeholder="Your name"><input id="regEmail" type="email" placeholder="Email"><input id="regPass" type="password" placeholder="Password (8+ characters)"><button onclick="register()">Register</button></section>
+<section class="panel"><h2>Login</h2><input id="loginEmail" type="email" placeholder="Email"><input id="loginPass" type="password" placeholder="Password"><button onclick="login()">Login</button><button class="secondary" onclick="logout()">Logout</button></section>
+</div><div id="message" class="msg"></div>
+<section class="panel"><div class="top"><h2>Dashboard</h2><span id="who"><small>Not logged in</small></span></div>
+<div class="grid"><div><small>Projects</small><div class="stat" id="count">0</div></div><div><small>Platform</small><div class="stat">ARX</div></div><div><small>Database</small><div class="stat">Redis</div></div></div>
+<h3>Add project record</h3><input id="projectName" placeholder="Project name"><select id="runtime"><option value="python">Python</option><option value="node">Node.js</option></select><button onclick="addProject()">Add project</button><div id="projects"><small>Log in to view projects.</small></div>
+</section><p><small>Starter version: this dashboard stores account/project metadata. It does not execute uploaded bot code. Add a separately isolated runner before offering code execution to users.</small></p>
+</main><script>
+const $=id=>document.getElementById(id);async function api(url,data){let r=await fetch(url,{method:data?'POST':'GET',headers:{'Content-Type':'application/json'},body:data?JSON.stringify(data):undefined});let j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j}
+function say(t){$('message').textContent=t}
+async function register(){try{let j=await api('/api/register',{name:$('name').value,email:$('regEmail').value,password:$('regPass').value});say('Account created.');refresh()}catch(e){say(e.message)}}
+async function login(){try{await api('/api/login',{email:$('loginEmail').value,password:$('loginPass').value});say('Logged in.');refresh()}catch(e){say(e.message)}}
+async function logout(){await api('/api/logout',{});say('Logged out.');refresh()}
+async function addProject(){try{await api('/api/projects',{name:$('projectName').value,runtime:$('runtime').value});$('projectName').value='';say('Project record added.');refresh()}catch(e){say(e.message)}}
+async function refresh(){try{let me=await api('/api/me');$('who').textContent=me.user?me.user.name+' · '+me.user.email:'Not logged in';let p=await api('/api/projects');$('count').textContent=p.projects.length;$('projects').innerHTML=p.projects.map(x=>`<p><b>${escapeHtml(x.name)}</b> · ${x.runtime} · ${x.status}</p>`).join('')||'<small>No projects yet.</small>'}catch(e){$('projects').textContent='Log in to view projects.';$('count').textContent='0'}}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}refresh();
+</script></body></html>
